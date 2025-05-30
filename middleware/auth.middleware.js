@@ -1,31 +1,32 @@
-const jwt=require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 require('dotenv').config();
-const verifyToken=(req,res,next)=>{
-    const authHeader=req.headers?.authorization;
 
-    if(!authHeader || !authHeader.startsWith('Bearer')){
-        return res.status(401).json({message:'Authorization token Missing'});
+const verifyToken = (req, res, next) => {
+    const authHeader = req.headers?.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer')) {
+        return res.status(401).json({ message: 'Authorization token Missing' });
     }
 
-    const token=authHeader.split(' ')[1];
+    const token = authHeader.split(' ')[1];
 
-    try{
-        const decoded= jwt.verify(token,process.env.JWT_SECRET);
-        req.user=decoded;
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
         next();
-    }catch(err){
-        return res.status(403).json({message:'Invalid or expired token'});
+    } catch (err) {
+        return res.status(403).json({ message: 'Invalid or expired token' });
     }
 };
 
-const requireRole=(role)=>(req,res,next)=>{
-    if(req.user?.role!==role){
-        return res.status(403).json({message:`Access denied: only ${role}s allowed`});
+const requireRole = (role) => (req, res, next) => {
+    if (req.user?.role !== role) {
+        return res.status(403).json({ message: `Access denied: only ${role}s allowed` });
     }
     next();
 };
 
-module.exports={
+module.exports = {
     verifyToken,
     requireRole
 };

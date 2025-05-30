@@ -81,3 +81,47 @@ exports.delete_Driver_By_id = async (driverId) => {
     );
     return rows;
 };
+
+exports.get_Driver_Profile = async (userId) => {
+    const [rows] = await db.execute(
+        `SELECT d.id, u.name as Name, u.email as Email, d.vehicle_number, d.license_number, d.is_approved, 
+        d.rating, d.total_earnings, d.profile_image FROM drivers d
+    JOIN users u ON d.user_id = u.id where u.id = ?`, [userId]
+    );
+    return rows;
+};
+
+exports.get_My_Deliveries = async (driverId) => {
+    const [rows] = await db.execute(
+        ` SELECT 
+        id,
+        customer_id,
+        restaurant_id,
+        total_price,
+        payment_method,
+        payment_status,
+        order_status,
+        created_at
+      FROM orders
+      WHERE driver_id = ?
+      ORDER BY created_at DESC`,
+        [
+            driverId
+        ]
+    );
+    return rows;
+};
+
+exports.update_Order_Status = async (id, data) => {
+    const [rows] = await db.execute(
+        `UPDATE orders SET 
+        payment_method = ?, payment_status = ?, order_status = ? WHERE id = ?`,
+        [
+            data.payment_method,
+            data.payment_status,
+            data.order_status,
+            id
+        ]
+    );
+    return rows;
+};

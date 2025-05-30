@@ -117,6 +117,22 @@ const initModels = async () => {
 );
      `)
 
+    await db.query(
+      `CREATE TABLE IF NOT EXISTS driver_reviews (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT,
+  customer_id INT,
+  driver_id INT,
+  rating INT CHECK (rating BETWEEN 1 AND 5),
+  review TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (order_id) REFERENCES orders(id),
+  FOREIGN KEY (customer_id) REFERENCES users(id),
+  FOREIGN KEY (driver_id) REFERENCES users(id)
+);
+
+     `)
+
     console.log("All tables created successfully.");
   } catch (err) {
     console.error("Error creating tables:", err);

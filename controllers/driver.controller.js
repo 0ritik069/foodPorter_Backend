@@ -143,7 +143,7 @@ exports.updateDriverById = async (req, res) => {
         const oldDriver = await driverModel.find_Driver_By_Id(driverId);
         if (!oldDriver) {
             if (imagePath) await fs.unlink(imagePath);
-            console.log('Driver Nor Found');
+            console.log('Driver Not Found');
             return res.status(400).json({
                 success: false,
                 message: 'Driver Not Found'
@@ -213,6 +213,101 @@ exports.deleteDriverById = async (req, res) => {
 
     } catch (error) {
         console.error('Driver Deleting', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.getDriverProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const driverProfile = await driverModel.get_Driver_Profile(userId);
+        if (!driverProfile || driverProfile.affectedRows === 0) {
+            console.log('Driver Not Found!');
+            return res.status(400).json({
+                success: false,
+                message: 'Driver Not Found!'
+            });
+        }
+        console.log('Profile Fetched Successfully');
+        return res.status(200).json({
+            success: true,
+            message: 'Profile Fetched Successfully',
+            Profile: driverProfile
+        });
+    } catch (error) {
+        console.error('Fetching Driver Profile', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.getMyDeliveries = async (req, res) => {
+    try {
+        const driverId = req.user.id;
+        const driverDeliveries = await driverModel.get_My_Deliveries(driverId);
+        if (!driverDeliveries || driverDeliveries.length === 0) {
+            console.log('No Deliveries Available Now!');
+            return res.status(400).json({
+                success: true,
+                message: 'No Delaveries Avaliable Now!'
+            });
+        }
+        console.log('Deliveries Fetched Successfully');
+        return res.status(200).json({
+            success: true,
+            message: 'Deliveries Fetched Successfully',
+            Delivarie_Data: driverDeliveries
+        });
+    } catch (error) {
+        console.error('Fetching Driver Deliveries', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.updateOrderStatus = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const {
+            payment_method,
+            payment_status,
+            order_status
+        } = req.body;
+
+        if (!payment_method || !payment_status || !order_status) {
+            return res.status(400).json({
+                success: false,
+                message: 'All fields are required!'
+            });
+        }
+
+        const result = await driverModel.update_Order_Status(orderId, {
+            payment_method,
+            payment_status,
+            order_status
+        });
+
+        if (!result || result.affectedRows === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Update Failed!'
+            });
+        }
+
+        console.log('Order status updated successfully.');
+        return res.status(200).json({
+            success: true,
+            message: 'Order status updated successfully.'
+        });
+    } catch (error) {
+        console.error('Error updating status:', error);
         return res.status(500).json({
             success: false,
             message: 'Internal Server Error'
