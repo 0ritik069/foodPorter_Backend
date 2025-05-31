@@ -125,3 +125,36 @@ exports.update_Order_Status = async (id, data) => {
     );
     return rows;
 };
+
+exports.rating_Reviews_By_Customer = async (data) => {
+    const [rows] = await db.execute(
+        `INSERT INTO driver_reviews (order_id, customer_id, driver_id, rating, review)
+        VALUES (?, ?, ?, ?, ?)`,
+        [
+            data.order_id,
+            data.customer_id,
+            data.driver_id,
+            data.rating || null,
+            data.review || null
+        ]
+    );
+    return rows;
+};
+
+exports.check_Customer_Order = async (order_id, customerId, driver_id) => {
+    const [rows] = await db.execute(
+        `SELECT * FROM orders WHERE id = ? AND customer_id = ? AND driver_id = ?`,
+        [order_id, customerId, driver_id]
+    );
+    return rows;
+};
+
+exports.get_Driver_Rating_Review = async (id) => {
+    const [rows] = await db.execute(
+        `SELECT * FROM driver_reviews WHERE driver_id = ?`,
+        [
+            id
+        ]
+    );
+    return rows;
+};

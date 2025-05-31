@@ -314,3 +314,98 @@ exports.updateOrderStatus = async (req, res) => {
         });
     }
 };
+
+exports.reviewRatingByCustomer = async (req, res) => {
+    try {
+        const customerId = req.user.id;
+        let {
+            order_id,
+            driver_id,
+            rating,
+            review
+        } = req.body;
+
+        if (!order_id || !driver_id) {
+            console.log('OrderId and DriverId Required');
+            return res.status(400).json({
+                success: false,
+                message: 'OrderId and DriverId Required'
+            });
+        }
+
+        const numericRating = Number(rating);
+        if (isNaN(numericRating) || numericRating < 1 || numericRating > 5) {
+            console.log('Rating must be a number between 1 and 5');
+            return res.status(400).json({
+                success: false,
+                message: 'Rating must be a number between 1 and 5'
+            });
+        }
+
+        const orderCheck = await driverModel.check_Customer_Order(order_id, customerId, driver_id);
+        if (orderCheck.length === 0) {
+            console.log('Order not found for this customer and driver');
+            return res.status(403).json({
+                success: false,
+                message: 'You are not allowed to rate this driver for this order.'
+            });
+        }
+
+        const ratingAndReviews = await driverModel.rating_Reviews_By_Customer({
+            order_id,
+            customer_id: customerId,
+            driver_id,
+            rating: numericRating,
+            review
+        });
+
+        if (!ratingAndReviews || ratingAndReviews.affectedRows === 0) {
+            console.log('Failed Creating Review and Rating');
+            return res.status(400).json({
+                success: false,
+                message: 'Failed Creating Review and Rating'
+            });
+        }
+
+        console.log('Review and Rating Created...');
+        return res.status(200).json({
+            success: true,
+            message: 'Review and Rating Created...',
+            Id: ratingAndReviews.insertId
+        });
+
+    } catch (error) {
+        console.error('Add Review and Rating', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.getDriverRatingReview = async (req, res) => {
+    try {
+        const id = req.user.id;
+        const driverRatingReview = await driverModel.get_Driver_Rating_Review(id);
+        if (!driverRatingReview || driverRatingReview.length === 0) {
+            console.log(`Reviews Not Found for DriverId:${id}`);
+            return res.status(400).json({
+                success: false,
+                message: `Reviews Not Found for DriverId:${id}`
+            });
+        }
+        console.log('Driver Reviews Fetched...');
+        return res.status(200).json({
+            success: true,
+            message: 'Driver Reviews Fetched...',
+            Data: driverRatingReview
+        });
+
+    } catch (error) {
+        console.error('Fetching Reviews', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};

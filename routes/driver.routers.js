@@ -15,4 +15,7 @@ router.get('/profile', verifyToken, requireRole('driver'), driverController.getD
 router.get('/my_deliveries', verifyToken, requireRole('driver'), driverController.getMyDeliveries);
 router.post('/update_order_status/:id', verifyToken, requireRole('driver'), driverController.updateOrderStatus);
 
+router.post('/review_rating', verifyToken, requireRole('customer'), driverController.reviewRatingByCustomer);
+router.get('/get_reviews', verifyToken, requireRole('driver'), driverController.getDriverRatingReview);
+
 module.exports = router;
