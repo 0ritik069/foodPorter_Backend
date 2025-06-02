@@ -12,7 +12,6 @@ exports.createDriver = async (req, res) => {
             license_number,
             is_approved,
             rating,
-            total_earnings
         } = req.body;
 
         if (!user_id) {
@@ -50,7 +49,6 @@ exports.createDriver = async (req, res) => {
             profile_image,
             is_approved,
             rating,
-            total_earnings
         });
 
         console.log('Driver Created Successfully');
@@ -127,7 +125,6 @@ exports.updateDriverById = async (req, res) => {
             license_number,
             is_approved,
             rating,
-            total_earnings
         } = req.body;
 
         const driverId = req.params.id;
@@ -156,7 +153,6 @@ exports.updateDriverById = async (req, res) => {
                 profile_image,
                 is_approved,
                 rating,
-                total_earnings
             }
         );
         if (!updateDriver || updateDriver.affectedRows === 0) {
@@ -406,6 +402,200 @@ exports.getDriverRatingReview = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.getCustomerContact = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const contact = await driverModel.get_Customer_Contact(orderId);
+        if (!contact) {
+            return res.status(400).json({
+                success: false,
+                message: 'Customer Contact Not Found'
+            });
+        }
+
+        console.log('Contact Fetched Successfully...');
+        return res.status(200).json({
+            success: true,
+            message: 'Contact Fetched Successfully...',
+            Contact: contact
+        });
+
+    } catch (error) {
+        console.error('Fetching Customer Contact', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.sendMessageToCustomer = async (req, res) => {
+    try {
+        const driverId = req.user.id;
+        const {
+            to_customer_id,
+            message,
+        } = req.body;
+
+        if (!driverId) {
+            return res.status(400).json({
+                success: false,
+                message: 'driver ID is required'
+            });
+        }
+
+        if (!to_customer_id || !message) {
+            return res.status(400).json({
+                success: false,
+                messages: 'Customer ID and message are required'
+            });
+        }
+
+        const isCustomerExists = await driverModel.check_Customer_Exists(to_customer_id);
+        if (!isCustomerExists || isCustomerExists.length === 0) {
+            console.log(`Customer Not Exists. Message can't send`);
+            return res.status(400).json({
+                success: false,
+                messages: `Customer Not Exists. Message can't send`
+            });
+        }
+
+        const driverMessage = await driverModel.send_Message_To_Customer({
+            from_driver_id: driverId,
+            to_customer_id,
+            message
+        });
+
+        if (!driverMessage || driverMessage.affectedRows === 0) {
+            console.log('Message Not Send');
+            return res.status(400).json({
+                success: false,
+                messages: 'Message Not Send'
+            });
+        }
+
+        console.log('Message Sent Successfully...');
+        return res.status(200).json({
+            success: true,
+            messages: 'Message Sent Successfully',
+            id: driverMessage.insertId
+        });
+
+    } catch (error) {
+        console.log('Sending Message', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.getDriverEarnings = async (req, res) => {
+    try {
+        const driverId = req.user.id;
+        const earnings = await driverModel.driver_Earnings(driverId);
+        if (!earnings || earnings.length === 0) {
+            console.log('Driver Earning Not Found');
+            return res.status(400).json({
+                success: false,
+                message: 'Driver Earning Not Found',
+            });
+        }
+        console.log('Total Earning get Successfully');
+        return res.status(200).json({
+            success: true,
+            message: 'Total Earning get Successfully',
+            Total_Earning: earnings
+        });
+
+    } catch (error) {
+        console.error('Fetching Driver Earning', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.getDriverMessages = async (req, res) => {
+    try {
+        const driverId = req.user.id;
+        const driverMessage = await driverModel.get_All_Messages(driverId);
+        if (!driverMessage || driverMessage.length === 0) {
+            console.log('Messages Not Found');
+            return res.status(400).json({
+                success: false,
+                message: 'Messages Not Found'
+            });
+        }
+        console.log('Messages get Successfully');
+        return res.status(200).json({
+            success: true,
+            message: 'Messages get Successfully',
+            Messages: driverMessage
+        });
+
+    } catch (error) {
+        console.error('Fetching Driver Messages', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.updateMessages = async (req, res) => {
+    try {
+        const {
+            to_customer_id,
+            message,
+            id
+        } = req.body;
+
+        if (!to_customer_id || !message || !id) {
+            console.log('All Fields are required..');
+            return res.status(400).json({
+                success: false,
+                messages: 'All Fields are required'
+            });
+        }
+
+        const isCustomerExists = await driverModel.check_Customer_Exists(to_customer_id);
+        if (!isCustomerExists || isCustomerExists.length === 0) {
+            console.log(`Customer Not Found. can't Update`)
+            return res.status(400).json({
+                success: false,
+                messages: `Customer Not Found. can't Update`
+            });
+        }
+
+        const messageUpdate = await driverModel.update_Messages(id, {
+            to_customer_id,
+            message,
+        });
+
+        if (!messageUpdate || messageUpdate.affectedRows === 0) {
+            console.log('Messages Not Update');
+            return res.status(400).json({
+                success: false,
+                messages: 'Messages Not Update'
+            });
+        }
+        console.log('Messages Updated Successfully');
+        return res.status(200).json({
+            success: true,
+            messages: 'Messages Updated Successfully'
+        });
+
+    } catch (error) {
+        console.error('Updating messages', error);
+        return res.status(500).json({
+            success: false,
+            messages: 'Internal Server Error'
         });
     }
 };

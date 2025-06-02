@@ -89,14 +89,13 @@ const initModels = async () => {
     await db.query(`
       CREATE TABLE If Not Exists customers (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(100) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
   phone VARCHAR(20),
   profile_image VARCHAR(255),
   address TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  user_id int not null,
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
       `);
@@ -132,6 +131,19 @@ const initModels = async () => {
 );
 
      `)
+
+    await db.query(
+      `CREATE TABLE IF NOT EXISTS messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  from_driver_id INT,
+  to_customer_id INT,
+  message TEXT,
+  sent_at DATETIME,
+  FOREIGN KEY (from_driver_id) REFERENCES drivers(id),
+  FOREIGN KEY (to_customer_id) REFERENCES customers(id)
+);
+
+  `)
 
     console.log("All tables created successfully.");
   } catch (err) {

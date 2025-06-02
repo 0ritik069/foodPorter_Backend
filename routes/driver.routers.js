@@ -18,4 +18,10 @@ router.post('/update_order_status/:id', verifyToken, requireRole('driver'), driv
 router.post('/review_rating', verifyToken, requireRole('customer'), driverController.reviewRatingByCustomer);
 router.get('/get_reviews', verifyToken, requireRole('driver'), driverController.getDriverRatingReview);
 
+router.get('/customer_contact/:id', driverController.getCustomerContact);
+router.post('/message_to_customer', verifyToken, requireRole('driver'), driverController.sendMessageToCustomer);
+router.get('/total_earning', verifyToken, requireRole('driver'), driverController.getDriverEarnings);
+router.get('/all_messages', verifyToken, requireRole('driver'), driverController.getDriverMessages);
+router.post('/update_messages', verifyToken, requireRole('driver'), driverController.updateMessages);
+
 module.exports = router;

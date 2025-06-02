@@ -2,16 +2,15 @@ const db = require('../config/db');
 
 exports.create_Driver = async (driverData) => {
     const [rows] = await db.execute(
-        `INSERT INTO drivers (user_id, vehicle_number, license_number, profile_image, is_approved, rating, total_earnings)
-        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO drivers (user_id, vehicle_number, license_number, profile_image, is_approved, rating)
+        VALUES (?, ?, ?, ?, ?, ?)`,
         [
             driverData.user_id,
             driverData.vehicle_number || null,
             driverData.license_number || null,
             driverData.profile_image || null,
             driverData.is_approved || null,
-            driverData.rating || null,
-            driverData.total_earnings || null
+            driverData.rating || null
         ]
     );
     return rows;
@@ -58,14 +57,13 @@ exports.find_Driver_By_Id = async (driverId) => {
 exports.update_Driver_By_Id = async (id, driverData) => {
     const [rows] = await db.execute(
         `UPDATE drivers set vehicle_number = ?, license_number = ?, profile_image = ?,
-        is_approved = ?, rating = ?, total_earnings = ? WHERE id = ?`,
+        is_approved = ?, rating = ? WHERE id = ?`,
         [
             driverData.vehicle_number || null,
             driverData.license_number || null,
             driverData.profile_image || null,
             driverData.is_approved || null,
             driverData.rating || null,
-            driverData.total_earnings || null,
             id
         ]
     );
@@ -85,7 +83,7 @@ exports.delete_Driver_By_id = async (driverId) => {
 exports.get_Driver_Profile = async (userId) => {
     const [rows] = await db.execute(
         `SELECT d.id, u.name as Name, u.email as Email, d.vehicle_number, d.license_number, d.is_approved, 
-        d.rating, d.total_earnings, d.profile_image FROM drivers d
+        d.rating, d.profile_image FROM drivers d
     JOIN users u ON d.user_id = u.id where u.id = ?`, [userId]
     );
     return rows;
@@ -153,6 +151,74 @@ exports.get_Driver_Rating_Review = async (id) => {
     const [rows] = await db.execute(
         `SELECT * FROM driver_reviews WHERE driver_id = ?`,
         [
+            id
+        ]
+    );
+    return rows;
+};
+
+exports.get_Customer_Contact = async (orderId) => {
+    const [rows] = await db.query(
+        `SELECT customers.id AS customer_id, customers.phone 
+     FROM orders
+     JOIN customers ON orders.customer_id = customers.user_id
+     WHERE orders.id = ?`,
+        [orderId]
+    );
+    return rows[0];
+};
+
+exports.send_Message_To_Customer = async (data) => {
+    const [rows] = await db.execute(
+        `INSERT INTO messages (from_driver_id, to_customer_id, message, sent_at)
+     VALUES (?, ?, ?, NOW())`,
+        [
+            data.from_driver_id || null,
+            data.to_customer_id || null,
+            data.message || null
+        ]
+    );
+    return rows;
+};
+
+exports.check_Customer_Exists = async (id) => {
+    const [rows] = await db.execute(
+        `select id from customers where id = ?`,
+        [
+            id
+        ]
+    );
+    return rows;
+};
+
+exports.driver_Earnings = async (driverId) => {
+    const [rows] = await db.execute(
+        `SELECT SUM(o.total_earnings) AS Total_Earnings
+     FROM orders o
+     WHERE o.driver_id = ? AND o.order_status = 'delivered'`,
+        [
+            driverId
+        ]
+    );
+    return rows;
+};
+
+exports.get_All_Messages = async (driverId) => {
+    const [rows] = await db.execute(
+        `select * from messages where from_driver_id = ?`,
+        [
+            driverId
+        ]
+    );
+    return rows;
+};
+
+exports.update_Messages = async (id, data) => {
+    const [rows] = await db.execute(
+        `UPDATE messages set to_customer_id = ?, message = ? where id = ?`,
+        [
+            data.to_customer_id || null,
+            data.message || null,
             id
         ]
     );
