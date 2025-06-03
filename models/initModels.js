@@ -145,6 +145,20 @@ const initModels = async () => {
 
   `)
 
+    await db.execute(
+      `CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT,
+    receiver_id INT,
+    sender_type ENUM('customer', 'restaurant', 'admin') NOT NULL,
+    receiver_type ENUM('driver', 'customer', 'admin') NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+  `)
+
     console.log("All tables created successfully.");
   } catch (err) {
     console.error("Error creating tables:", err);

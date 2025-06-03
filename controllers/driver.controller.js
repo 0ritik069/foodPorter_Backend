@@ -599,3 +599,196 @@ exports.updateMessages = async (req, res) => {
         });
     }
 };
+
+exports.sendNotification = async (req, res) => {
+    try {
+        const senderId = req.user.id;
+        const {
+            receiver_id,
+            sender_type,
+            receiver_type,
+            message
+        } = req.body;
+
+        if (!senderId || !receiver_id) {
+            console.log('senderId and receiverId is required');
+            return res.status(400).json({
+                success: false,
+                messages: 'senderId and receiverId is required'
+            });
+        }
+        if (!sender_type || !receiver_type) {
+            console.log('senderType and receiverType is required');
+            return res.status(400).json({
+                success: false,
+                messages: 'senderType and receiverType is required'
+            });
+        }
+        if (!message) {
+            console.log(`message can't be empty, required!`);
+            return res.status(400).json({
+                success: false,
+                messages: `message can't be empty, required! `
+            });
+        }
+        const isUserExists = await driverModel.checkUserExists(receiver_id);
+        if (!isUserExists) {
+            console.log('receiver-Id Not exists. Notification not send');
+            return res.status(400).json({
+                success: false,
+                messages: 'receiver-Id Not exists. Notification not send'
+            });
+        }
+        const notification = await driverModel.send_Notification({
+            sender_id: senderId,
+            receiver_id,
+            sender_type,
+            receiver_type,
+            message
+        });
+        if (!notification || notification.affectedRows === 0) {
+            console.log('Notification Not Send!');
+            return res.status(400).json({
+                success: false,
+                messages: 'Notification Not Send'
+            });
+        }
+        console.log('Notification send successfully!');
+        return res.status(200).json({
+            success: true,
+            messages: 'Notification send successfully',
+            Id: notification.insertId
+        });
+
+    } catch (error) {
+        console.error('Sending notification', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.getDriverNotification = async (req, res) => {
+    try {
+
+        const driverId = req.user.id;
+        const notification = await driverModel.get_Driver_Notification(driverId);
+
+        if (!notification || notification.length === 0) {
+            console.log(`Notification Not Found for DriverID ${driverId}`);
+            return res.status(400).json({
+                success: false,
+                message: `Notification Not Found for DriverID ${driverId}`
+            });
+        }
+        console.log('Notification Fetched Successfully...');
+        return res.status(200).json({
+            success: true,
+            message: 'Notification Fetched Successfully',
+            Data: notification
+        });
+
+    } catch (error) {
+        console.log('fetching notification', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.updateDriverNotification = async (req, res) => {
+    try {
+        const {
+            id,
+            receiver_id,
+            receiver_type,
+            message
+        } = req.body;
+
+        if (!id || !receiver_id || !receiver_type || !message) {
+            console.log('All Fields are required!');
+            return res.status(400).json({
+                success: false,
+                messages: 'All Fields are required!'
+            });
+        }
+        const notificationExist = await driverModel.check_Notification_exists(id);
+        if (!notificationExist) {
+            console.log(`Notification Id:${id} not exists. Can't update!`);
+            return res.status(400).json({
+                success: false,
+                messages: `Notification Id:${id} not exists. Can't update!`
+            });
+        }
+
+        const receiverExists = await driverModel.checkUserExists(receiver_id);
+        if (!receiverExists) {
+            console.log(`Receiver Id:${receiver_id} Not exist. can't Update`);
+            return res.status(400).json({
+                success: false,
+                messages: `Receiver Id:${receiver_id} Not exist. can't Update`
+            });
+        }
+
+        const update = await driverModel.update_Driver_Notification({
+            id,
+            receiver_id,
+            receiver_type,
+            message
+        });
+        if (!update || update.affectedRows === 0) {
+            console.log('Notification Not Update!');
+            return res.status(400).json({
+                success: false,
+                message: 'Notification Not Update!'
+            });
+        }
+        console.log('Notification Updated Successfully...');
+        return res.status(200).json({
+            success: true,
+            message: 'Notification Updated Successfully'
+        });
+
+    } catch (error) {
+        console.log('Updating Notification', error);
+        return res.status(500).json({
+            success: false,
+            messages: 'Internal Server Error'
+        });
+    }
+};
+
+exports.deleteNotifications = async (req, res) => {
+    try {
+        const id = req.params.id;
+        if (!id) {
+            console.log('Id is required...');
+            return res.status(400).json({
+                success: false,
+                message: 'Id is required'
+            });
+        }
+        const deleteNotification = await driverModel.delete_Notification_By_Id(id);
+        if (!deleteNotification || deleteNotification.affectedRows === 0) {
+            console.log('Notification Not Found');
+            return res.status(400).json({
+                success: false,
+                message: 'Notification Not Found'
+            });
+        }
+        console.log('Notification deleted successfully...');
+        return res.status(200).json({
+            success: true,
+            message: 'Notification deleted successfully...'
+        });
+        
+    } catch (error) {
+        console.error('Deleting Notification', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};

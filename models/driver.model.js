@@ -224,3 +224,62 @@ exports.update_Messages = async (id, data) => {
     );
     return rows;
 };
+
+exports.send_Notification = async (data) => {
+    const [rows] = await db.execute(
+        `INSERT INTO notifications (sender_id, receiver_id, sender_type, receiver_type, message)
+        VALUES (?, ?, ?, ?, ?)`,
+        [
+            data.sender_id,
+            data.receiver_id,
+            data.sender_type,
+            data.receiver_type,
+            data.message
+        ]
+    );
+    return rows;
+};
+
+exports.get_Driver_Notification = async (driverId) => {
+    const [rows] = await db.execute(
+        `SELECT id, receiver_id, receiver_type, message, created_at from notifications 
+        WHERE sender_id = ? and sender_type = 'driver'`,
+        [
+            driverId
+        ]
+    );
+    return rows;
+};
+
+exports.update_Driver_Notification = async (data) => {
+    const [rows] = await db.execute(
+        `UPDATE notifications SET receiver_id = ?, receiver_type = ?, message = ? where id = ?`,
+        [
+            data.receiver_id,
+            data.receiver_type,
+            data.message,
+            data.id
+        ]
+    );
+    return rows;
+};
+
+exports.check_Notification_exists = async (id) => {
+    const [rows] = await db.execute(
+        `SELECT id from notifications WHERE id = ?`,
+        [
+            id
+        ]
+    );
+    return rows[0];
+};
+
+exports.delete_Notification_By_Id = async (id) => {
+    const [rows] = await db.execute(
+        `DELETE FROM notifications WHERE id = ?`,
+        [
+            id
+        ]
+    );
+    return rows;
+};

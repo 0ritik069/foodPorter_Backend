@@ -24,4 +24,9 @@ router.get('/total_earning', verifyToken, requireRole('driver'), driverControlle
 router.get('/all_messages', verifyToken, requireRole('driver'), driverController.getDriverMessages);
 router.post('/update_messages', verifyToken, requireRole('driver'), driverController.updateMessages);
 
+router.post('/notification', verifyToken, requireRole('driver'), driverController.sendNotification);
+router.get('/my_notification', verifyToken, requireRole('driver'), driverController.getDriverNotification);
+router.post('/update_notification', verifyToken, requireRole('driver'), driverController.updateDriverNotification);
+router.post('/delete_notification/:id', verifyToken, requireRole('driver'), driverController.deleteNotifications);
+
 module.exports = router;
