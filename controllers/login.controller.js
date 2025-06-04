@@ -17,6 +17,16 @@ const login = (role) => async (req, res) => {
       return res.status(400).json({ success: false, message: 'User not found' });
     }
     const user = results[0];
+
+
+     if (user.role !== role) {
+      return res.status(403).json({
+        success: false,
+        message: `Only ${role} can login from this route`
+      });
+    }
+
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: 'Invalid password' });

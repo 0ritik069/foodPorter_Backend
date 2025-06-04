@@ -8,12 +8,12 @@ const getUserByEmail = (email, callback) => {
 
 // Create new user (for signup)
 const createUser = (userData, callback) => {
-  const { name, email, password, role } = userData;
-  const sql = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)';
-  pool.query(sql, [name, email, password, role], callback);
+  const { fullName, email, password, role, phone,countryCode } = userData;
+  const sql = 'INSERT INTO users (fullName, email, password, role,phone,countryCode ) VALUES (?, ?, ?, ?, ?, ?)';
+  pool.query(sql, [fullName, email, password, role, phone,countryCode ], callback);
 };
 
 module.exports = {
   getUserByEmail,
-  createUser 
+  createUser
 };

@@ -9,5 +9,6 @@ router.get('/',customerController.getAllCustomers);
 router.get('/:id', customerController.getCustomerById);
 router.put('/:id',customerController.updateCustomer);
 router.delete('/:id', customerController.deleteCustomer);
+router.get('/home', customerController.getCustomerHome);
 
 module.exports=router;
