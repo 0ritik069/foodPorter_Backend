@@ -11,6 +11,7 @@ const categoryRoutes = require('./routes/category.route');
 const ProductRoutes = require('./routes/product.routes');
 const customerRoutes = require('./routes/customer.route');
 const driverRoutes = require('./routes/driver.routers');
+const otpRoutes = require('./routes/otpRoutes');
 
 dotenv.config();
 
@@ -22,8 +23,11 @@ app.use(express.urlencoded({ extended: true }));
 initModels();
 
 app.use('/uploads', express.static('uploads'));
-//routes
+
+
+
 app.use('/api/auth', authRoutes);
+app.use('/api/otp', otpRoutes);
 app.use('/api/protected', protected);
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/orders', orderRoutes);

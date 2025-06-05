@@ -13,7 +13,28 @@ const createUser = (userData, callback) => {
   pool.query(sql, [fullName, email, password, role, phone,countryCode ], callback);
 };
 
+
+  const saveOtp = (phone,otp,expiry,callback) => {
+    const sql=`
+    Insert into users (phone,otp,otp_expiry)
+    values(?,?,?)
+    On Duplicate Key Update otp=values(otp),
+    otp_expiry=values(otp_expiry) 
+    `;
+    pool.query(sql,[phone, otp, expiry], callback);
+  };
+
+  const getUserByPhoneAndOtp = (phone, otp, callback) => {
+    const sql = `Select * from users where phone =? And otp=?`;
+    pool.query(sql, [phone,otp], callback);
+  };
+
+
 module.exports = {
   getUserByEmail,
-  createUser
+  createUser,
+  saveOtp,
+  getUserByPhoneAndOtp
+
 };
+

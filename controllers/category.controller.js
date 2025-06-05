@@ -3,7 +3,7 @@ const Category = require('../models/category.model');
 exports.createCategory = async (req, res) => {
   try {
     const { name } = req.body;
-    const restaurant_id = req.params.restaurant_id; // assuming token gives restaurant info
+    const restaurant_id = req.params.restaurant_id; 
 
     if (!name) return res.status(400).json({ message: "Name is required" });
 

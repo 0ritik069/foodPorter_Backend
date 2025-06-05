@@ -55,11 +55,12 @@ exports.getCustomerHome = async (req, res) => {
     const recommendedQuery = `SELECT id, name, image, rating FROM restaurants ORDER BY RAND() LIMIT 8`;
     const trendingDishesQuery = `SELECT id, name, image, price FROM products WHERE isTrending = 1 LIMIT 10`;
 
-    const [topRated] = await pool.promise().query(topRatedQuery);
-    const [discounts] = await pool.promise().query(discountQuery);
-    const [categories] = await pool.promise().query(categoriesQuery);
-    const [recommended] = await pool.promise().query(recommendedQuery);
-    const [trendingDishes] = await pool.promise().query(trendingDishesQuery);
+    
+    const [topRated] = await pool.query(topRatedQuery);
+    const [discounts] = await pool.query(discountQuery);
+    const [categories] = await pool.query(categoriesQuery);
+    const [recommended] = await pool.query(recommendedQuery);
+    const [trendingDishes] = await pool.query(trendingDishesQuery);
 
     res.status(200).json({
       success: true,
