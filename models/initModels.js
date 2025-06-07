@@ -42,7 +42,7 @@ const initModels = async () => {
 
     // 4. Products Table
     await db.query(`
-      CREATE TABLE IF NOT EXISTS products (
+      CREATE TABLE IF NOT EXISTS dishes (
         id INT AUTO_INCREMENT PRIMARY KEY,
         category_id INT,
         restaurant_id INT,

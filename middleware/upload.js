@@ -3,7 +3,15 @@ const path = require('path');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/drivers'); // folder to save profile images
+    if (req.baseUrl.includes('restaurants')) {
+      cb(null, 'uploads/restaurants');
+    } else if (req.baseUrl.includes('drivers')) {
+      cb(null, 'uploads/drivers');
+    } else if (req.baseUrl.includes('categories')) {
+      cb(null, 'uploads/categories');  // Add this line to save category images here
+    } else {
+      cb(null, 'uploads/others');
+    }
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
@@ -13,7 +21,6 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  // Accept only jpeg and png
   const allowedTypes = ['image/jpeg', 'image/png'];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);

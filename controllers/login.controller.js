@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const validator = require('validator'); // ✅ validator import karo
+const validator = require('validator'); 
 const { getUserByEmail } = require('../models/user.model');
 require('dotenv').config();
 

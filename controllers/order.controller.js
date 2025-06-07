@@ -1,27 +1,52 @@
 const Order = require('../models/order.model');
 
+
 exports.placeOrder = async (req, res) => {
   try {
     const { restaurant_id, items, total_price, payment_method } = req.body;
     const customer_id = req.user.id;
 
-    const orderId = await Order.create({ customer_id, restaurant_id, total_price, payment_method });
+    if (!restaurant_id || !Array.isArray(items) || items.length === 0 || !total_price || !payment_method) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: restaurant_id, items, total_price, payment_method',
+      });
+    }
 
-    for (let item of items) {
+    
+    const orderId = await Order.create({
+      customer_id,
+      restaurant_id,
+      total_price,
+      payment_method,
+    });
+
+        for (let item of items) {
       await Order.addItem({
         order_id: orderId,
         product_id: item.product_id,
         quantity: item.quantity,
-        price: item.price
+        price: item.price,
       });
     }
 
-    res.status(201).json({ message: 'Order placed', order_id: orderId });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(201).json({
+      success: true,
+      message: 'Order placed successfully',
+      data: {
+        order_id: orderId,
+      },
+    });
+  } catch (error) {
+    console.error('Place Order Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message,
+    });
   }
 };
+
 
 exports.getMyOrders = async (req, res) => {
   try {
@@ -32,8 +57,17 @@ exports.getMyOrders = async (req, res) => {
       order.items = await Order.getOrderItems(order.id);
     }
 
-    res.json(orders);
-  } catch (err) {
-    res.status(500).json({ error: 'Something went wrong' });
+    res.status(200).json({
+      success: true,
+      message: 'Orders fetched successfully',
+      data: orders,
+    });
+  } catch (error) {
+    console.error('Get Orders Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message,
+    });
   }
 };

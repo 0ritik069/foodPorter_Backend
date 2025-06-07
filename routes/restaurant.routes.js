@@ -1,27 +1,23 @@
 const express = require('express');
-
 const router = express.Router();
+const upload = require('../middleware/upload');
+const {
+  getAllRestaurants,
+  getRestaurantById,
+  createRestaurant,
+  updateRestaurant,
+  deleteRestaurant,
+} = require('../controllers/restaurant.controller');
 
-const { getAllRestaurants, getRestaurantById, createRestaurant, updateRestaurant, deleteRestaurant } = require('../controllers/restaurant.controller');
+// Upload image when creating restaurant
+router.post('/', upload.single('image'), createRestaurant);
 
+// Upload image when updating restaurant
+router.put('/:id', upload.single('image'), updateRestaurant);
 
-
-
-
-
-// Get all restaurants
-router.get('/',getAllRestaurants);
-
-// Get restaurant by ID
+// Other routes
+router.get('/', getAllRestaurants);
 router.get('/:id', getRestaurantById);
+// router.delete('/:id', deleteRestaurant);
 
-//create a new restaurants
-router.post('/', createRestaurant);
-
-//update a restaurant
-router.put('/:id', updateRestaurant);
-
-//delete a restaurant
-router.delete('/:id',deleteRestaurant);
-
-module.exports=router;
+module.exports = router;

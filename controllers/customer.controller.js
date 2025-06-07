@@ -1,5 +1,5 @@
 const Customer = require('../models/customer.model');
-const pool = require('../config/db'); // for raw queries in getCustomerHome
+const pool = require('../config/db'); 
 
 exports.createCustomer = async (req, res) => {
   try {

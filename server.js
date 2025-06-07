@@ -8,11 +8,12 @@ const protected = require('./routes/protected.routes');
 const restaurantRoutes = require('./routes/restaurant.routes');
 const orderRoutes = require('./routes/order.route');
 const categoryRoutes = require('./routes/category.route');
-const ProductRoutes = require('./routes/product.routes');
+const DishRoutes = require('./routes/dish.routes');
 const customerRoutes = require('./routes/customer.route');
 const driverRoutes = require('./routes/driver.routers');
 const otpRoutes = require('./routes/otpRoutes');
-
+const searchRoutes = require('./routes/search.route');
+const path = require('path');
 dotenv.config();
 
 const app = express();
@@ -22,7 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 initModels();
 
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 
@@ -32,9 +33,10 @@ app.use('/api/protected', protected);
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/products', ProductRoutes);
+app.use('/api/dishes', DishRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/driver', driverRoutes);
+app.use('/api/search', searchRoutes);
 
 app.get('/', (req, res) => {
     res.send('API IS RUNNING');
