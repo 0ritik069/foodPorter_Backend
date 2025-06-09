@@ -1,25 +1,42 @@
 const Category = require('../models/category.model');
-
-const BASE_URL = 'http://192.168.1.80:5000'; // Change this accordingly
-
+const BASE_URL = 'http://192.168.1.80:5000';
+const pool = require('../config/db');
 exports.createCategory = async (req, res) => {
   try {
     const { name, distance } = req.body;
-    const restaurant_id = req.params.restaurant_id;
 
     if (!name) {
-      return res.status(400).json({
+      return res.status(400).json({ success: false, message: "Name is required" });
+    }
+
+    // ✅ STEP 1: Get restaurant_id from restaurants table using logged in user id (owner_user_id)
+    const [restaurantRows] = await pool.query(
+      'SELECT id FROM restaurants WHERE owner_user_id = ?',
+      [req.user.id]
+    );
+
+    if (restaurantRows.length === 0) {
+      return res.status(404).json({
         success: false,
-        message: "Name is required"
+        message: "Restaurant not found for this user"
       });
     }
 
+    const restaurant_id = restaurantRows[0].id; // ✅ Actual FK restaurant_id to insert in category
+
+    // ✅ STEP 2: Handle Image
     let image = null;
     if (req.file) {
-      image = `${BASE_URL}/uploads/categories/${req.file.filename}`;
+      image = req.file.filename;
     }
 
-    const categoryId = await Category.create({ name, restaurant_id, image, distance });
+    // ✅ STEP 3: Create Category
+    const categoryId = await Category.create({
+      name,
+      restaurant_id,
+      image,
+      distance
+    });
 
     res.status(201).json({
       success: true,
@@ -28,134 +45,98 @@ exports.createCategory = async (req, res) => {
         id: categoryId,
         name,
         restaurant_id,
-        image,
+        image: image ? `${BASE_URL}/uploads/categories/${image}` : null,
         distance
       }
     });
+
   } catch (error) {
-    console.error("Create Category Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    console.error("Category creation error:", error);
+    res.status(500).json({ success: false, message: "Internal server error", error: error.message });
   }
 };
-
 exports.getAllCategories = async (req, res) => {
   try {
     const categories = await Category.findAll();
-
-    // Map image to full URL if exists
-    const categoriesWithImageURL = categories.map(cat => {
-      if (cat.image && !cat.image.startsWith('http')) {
-        cat.image = `${BASE_URL}/uploads/categories/${cat.image}`;
-      }
-      return cat;
-    });
+    const categoriesWithImage = categories.map(c => ({
+      ...c,
+      image: c.image ? `${BASE_URL}/uploads/categories/${c.image}` : null
+    }));
 
     res.status(200).json({
       success: true,
-      message: "All categories fetched successfully",
-      data: categoriesWithImageURL
+      message: "All categories fetched",
+      data: categoriesWithImage
     });
   } catch (error) {
-    console.error("Get Categories Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: "Internal server error", error: error.message });
   }
 };
 
-exports.getCategoriesById = async (req, res) => {
+exports.getCategoriesByRestaurant = async (req, res) => {
   try {
     const restaurant_id = req.params.restaurant_id;
+    const categories = await Category.findByRestaurantId(restaurant_id);
 
-    const categories = await Category.findById(restaurant_id);
-
-    if (!categories || categories.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No categories found for this restaurant"
-      });
+    if (!categories.length) {
+      return res.status(404).json({ success: false, message: "No categories found" });
     }
 
-    // Add full image URL
-    const categoriesWithImageURL = categories.map(cat => {
-      if (cat.image && !cat.image.startsWith('http')) {
-        cat.image = `${BASE_URL}/uploads/categories/${cat.image}`;
-      }
-      return cat;
-    });
+    const formatted = categories.map(c => ({
+      ...c,
+      image: c.image ? `${BASE_URL}/uploads/categories/${c.image}` : null
+    }));
 
     res.status(200).json({
       success: true,
       message: "Categories fetched successfully",
-      data: categoriesWithImageURL
+      data: formatted
     });
   } catch (error) {
-    console.error("Get Category By ID Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: "Internal server error", error: error.message });
   }
 };
 
 exports.updateCategory = async (req, res) => {
   try {
-    const categoryId = req.params.id;
+    const id = req.params.id;
     const { name, distance } = req.body;
 
     let image = null;
     if (req.file) {
-      image = req.file.filename; // will store filename in DB
+      image = req.file.filename;
     }
 
-    await Category.update(categoryId, { name, distance, image });
+    await Category.update(id, { name, distance, image });
 
-    // Fetch updated category to send full data with image URL
-    const updatedCategory = await Category.findByIdByCategoryId(categoryId);
-
-    if (updatedCategory.image && !updatedCategory.image.startsWith('http')) {
-      updatedCategory.image = `${BASE_URL}/uploads/categories/${updatedCategory.image}`;
+    const updated = await Category.findByCategoryId(id);
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Category not found" });
     }
+
+    updated.image = updated.image ? `${BASE_URL}/uploads/categories/${updated.image}` : null;
 
     res.status(200).json({
       success: true,
       message: "Category updated successfully",
-      data: updatedCategory
+      data: updated
     });
   } catch (error) {
-    console.error("Update Category Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: "Internal server error", error: error.message });
   }
 };
 
 exports.deleteCategory = async (req, res) => {
   try {
-    const categoryId = req.params.id;
-    await Category.delete(categoryId);
+    const id = req.params.id;
+    await Category.delete(id);
+
     res.status(200).json({
       success: true,
       message: "Category deleted successfully",
-      data: {
-        id: categoryId
-      }
+      data: { id }
     });
   } catch (error) {
-    console.error("Delete Category Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: "Internal server error", error: error.message });
   }
 };

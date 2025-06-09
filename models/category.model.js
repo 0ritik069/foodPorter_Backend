@@ -14,7 +14,7 @@ const Category = {
     return rows;
   },
 
-  findById: async (restaurant_id) => {
+  findByRestaurantId: async (restaurant_id) => {
     const [rows] = await pool.query(
       'SELECT * FROM categories WHERE restaurant_id = ?',
       [restaurant_id]
@@ -22,8 +22,8 @@ const Category = {
     return rows;
   },
 
-  findByIdByCategoryId: async (categoryId) => {
-    const [rows] = await pool.query('SELECT * FROM categories WHERE id = ?', [categoryId]);
+  findByCategoryId: async (id) => {
+    const [rows] = await pool.query('SELECT * FROM categories WHERE id = ?', [id]);
     return rows[0];
   },
 

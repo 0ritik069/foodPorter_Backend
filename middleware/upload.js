@@ -8,7 +8,9 @@ const storage = multer.diskStorage({
     } else if (req.baseUrl.includes('drivers')) {
       cb(null, 'uploads/drivers');
     } else if (req.baseUrl.includes('categories')) {
-      cb(null, 'uploads/categories');  // Add this line to save category images here
+      cb(null, 'uploads/categories');
+    } else if (req.baseUrl.includes('dishes')) {
+      cb(null, 'uploads/dishes');
     } else {
       cb(null, 'uploads/others');
     }

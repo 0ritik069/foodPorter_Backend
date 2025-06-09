@@ -10,9 +10,7 @@ const Dish = {
   },
 
   findAll: async () => {
-    const [rows] = await pool.query(
-      'SELECT * FROM dishes'
-    );
+    const [rows] = await pool.query('SELECT * FROM dishes');
     return rows;
   },
 
@@ -22,15 +20,23 @@ const Dish = {
   },
 
   update: async (id, data) => {
-    const { name, description, price, image, is_available } = data;
+    const { name, description, price, image, is_available, category_id } = data;
     await pool.query(
-      'UPDATE dishes SET name = ?, description = ?, price = ?, image = ?, is_available = ? WHERE id = ?',
-      [name, description, price, image, is_available, id]
+      'UPDATE dishes SET name = ?, description = ?, price = ?, image = ?, is_available = ?, category_id = ? WHERE id = ?',
+      [name, description, price, image, is_available, category_id, id]
     );
   },
 
   delete: async (id) => {
     await pool.query('DELETE FROM dishes WHERE id = ?', [id]);
+  },
+
+   findByCategoryId: async (category_id) => {
+    const [rows] = await pool.query(
+      'SELECT * FROM dishes WHERE category_id = ?',
+      [category_id]
+    );
+    return rows;
   },
 };
 
