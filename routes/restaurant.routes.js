@@ -7,6 +7,7 @@ const {
   createRestaurant,
   updateRestaurant,
   deleteRestaurant,
+  getFilteredRestaurants
 } = require('../controllers/restaurant.controller');
 
 // Upload image when creating restaurant
@@ -17,7 +18,10 @@ router.put('/:id', upload.single('image'), updateRestaurant);
 
 // Other routes
 router.get('/', getAllRestaurants);
+router.get('/filters', getFilteredRestaurants);
 router.get('/:id', getRestaurantById);
+
+
 // router.delete('/:id', deleteRestaurant);
 
 module.exports = router;

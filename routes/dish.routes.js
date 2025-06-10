@@ -10,6 +10,9 @@ router.get('/', dishController.getAllDishes);
 router.get('/:id', dishController.getDishById);
 router.delete('/:id', verifyToken, requireRole("restaurant"), dishController.deleteDish);
 
+router.get('/restaurant/:restaurant_id', dishController.getDishesByRestaurantId);
+
+
 // routes/dish.routes.js
 router.get('/category/:category_id', dishController.getDishesByCategoryId);
 

@@ -41,7 +41,7 @@ exports.getAllRestaurants = async (req, res) => {
   try {
     const restaurants = await Restaurant.findAll();
 
-    // Map through restaurants and update image field to full URL if image exists
+   
     const restaurantsWithFullUrl = restaurants.map(r => {
       if (r.image) {
         r.image = `${BASE_URL}/uploads/restaurants/${r.image}`;
@@ -73,7 +73,7 @@ exports.getRestaurantById = async (req, res) => {
       });
     }
 
-    // Update image to full URL
+    
     if (restaurant.image) {
       restaurant.image = `${BASE_URL}/uploads/restaurants/${restaurant.image}`;
     }
@@ -119,6 +119,36 @@ exports.updateRestaurant = async (req, res) => {
       success: false,
       message: 'Error updating restaurant',
       error: err.message,
+    });
+  }
+};
+
+
+exports.getFilteredRestaurants = async (req, res) => {
+  try {
+    const { type } = req.query;
+
+    const data = await Restaurant.getFilteredRestaurants(type);
+
+    // Convert image filename to full URL
+    const dataWithFullUrl = data.map(r => {
+      if (r.image) {
+        r.image = `${BASE_URL}/uploads/restaurants/${r.image}`;
+      }
+      return r;
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Filtered restaurants by type: ${type || 'all'}`,
+      data: dataWithFullUrl
+    });
+  } catch (error) {
+    console.error("Filter error:", error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
     });
   }
 };

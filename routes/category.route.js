@@ -31,4 +31,8 @@ router.put(
 // Delete category
 router.delete('/:id', verifyToken, requireRole("restaurant"), categoryController.deleteCategory);
 
+router.get('/restaurants-by-category/:categoryName', categoryController.getRestaurantsByCategory);
+
+
+
 module.exports = router;

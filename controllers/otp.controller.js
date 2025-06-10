@@ -20,7 +20,7 @@ const  sendOtp=(req,res)=>{
     });
 };
 
-// Verify OTP
+
 
 const verifyOtp = (req, res) => {
     const {phone,otp} = req.body;

@@ -38,6 +38,16 @@ const Dish = {
     );
     return rows;
   },
+
+  findByRestaurantId: async (restaurant_id) => {
+  const [rows] = await pool.query(
+    'SELECT * FROM dishes WHERE restaurant_id = ?',
+    [restaurant_id]
+  );
+  return rows;
+},
+
+  
 };
 
 module.exports = Dish;

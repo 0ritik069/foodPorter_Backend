@@ -1,6 +1,7 @@
 const Category = require('../models/category.model');
 const BASE_URL = 'http://192.168.1.80:5000';
 const pool = require('../config/db');
+
 exports.createCategory = async (req, res) => {
   try {
     const { name, distance } = req.body;
@@ -9,34 +10,23 @@ exports.createCategory = async (req, res) => {
       return res.status(400).json({ success: false, message: "Name is required" });
     }
 
-    // ✅ STEP 1: Get restaurant_id from restaurants table using logged in user id (owner_user_id)
     const [restaurantRows] = await pool.query(
       'SELECT id FROM restaurants WHERE owner_user_id = ?',
       [req.user.id]
     );
 
     if (restaurantRows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Restaurant not found for this user"
-      });
+      return res.status(404).json({ success: false, message: "Restaurant not found for this user" });
     }
 
-    const restaurant_id = restaurantRows[0].id; // ✅ Actual FK restaurant_id to insert in category
+    const restaurant_id = restaurantRows[0].id;
 
-    // ✅ STEP 2: Handle Image
     let image = null;
     if (req.file) {
       image = req.file.filename;
     }
 
-    // ✅ STEP 3: Create Category
-    const categoryId = await Category.create({
-      name,
-      restaurant_id,
-      image,
-      distance
-    });
+    const categoryId = await Category.create({ name, restaurant_id, image, distance });
 
     res.status(201).json({
       success: true,
@@ -55,6 +45,7 @@ exports.createCategory = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error", error: error.message });
   }
 };
+
 exports.getAllCategories = async (req, res) => {
   try {
     const categories = await Category.findAll();
@@ -138,5 +129,43 @@ exports.deleteCategory = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error", error: error.message });
+  }
+};
+
+exports.getRestaurantsByCategory = async (req, res) => {
+  try {
+    const categoryName = req.params.categoryName.trim();
+
+    const restaurants = await Category.findRestaurantsByCategoryName(categoryName);
+
+    if (restaurants.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No restaurants found with category '${categoryName}'`
+      });
+    }
+
+    const formatted = restaurants.map(r => ({
+      ...r,
+      image: r.image ? `${BASE_URL}/uploads/restaurants/${r.image}` : null,
+      estimated_delivery_time: `${r.estimated_delivery_time} min`,
+      discount: `${r.discount}% OFF`,
+      free_delivery: true,
+      starting_price: `Rs.${r.starting_price}`
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: `Restaurants offering ${categoryName}`,
+      data: formatted
+    });
+
+  } catch (error) {
+    console.error("Error in getRestaurantsByCategory:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message
+    });
   }
 };

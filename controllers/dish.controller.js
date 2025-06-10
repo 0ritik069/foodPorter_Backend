@@ -13,7 +13,7 @@ exports.createDish = async (req, res) => {
       });
     }
 
-    // Fetch correct restaurant_id from restaurants table using owner_user_id
+    
     const [[restaurant]] = await pool.query(
       'SELECT id FROM restaurants WHERE owner_user_id = ?',
       [req.user.id]
@@ -190,6 +190,38 @@ exports.getDishesByCategoryId = async (req, res) => {
       success: true,
       message: "Dishes fetched successfully",
       data: formattedDishes
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+};
+
+
+exports.getDishesByRestaurantId = async (req, res) => {
+  try {
+    const { restaurant_id } = req.params;
+    const dishes = await Dish.findByRestaurantId(restaurant_id);
+
+    if (!dishes.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No dishes found for this restaurant"
+      });
+    }
+
+    const formatted = dishes.map(d => ({
+      ...d,
+      image: d.image ? baseUrl + d.image : null
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Dishes fetched successfully",
+      data: formatted
     });
   } catch (error) {
     res.status(500).json({
