@@ -37,6 +37,8 @@ app.use('/api/dishes', DishRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/driver', driverRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/filters', require('./routes/filter.route'));
+
 
 app.get('/', (req, res) => {
     res.send('API IS RUNNING');

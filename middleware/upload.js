@@ -1,20 +1,28 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
+    let folder = 'uploads/others'; // default
+
     if (req.baseUrl.includes('restaurants')) {
-      cb(null, 'uploads/restaurants');
+      folder = 'uploads/restaurants';
     } else if (req.baseUrl.includes('drivers')) {
-      cb(null, 'uploads/drivers');
+      folder = 'uploads/drivers';
     } else if (req.baseUrl.includes('categories')) {
-      cb(null, 'uploads/categories');
+      folder = 'uploads/categories';
     } else if (req.baseUrl.includes('dishes')) {
-      cb(null, 'uploads/dishes');
-    } else {
-      cb(null, 'uploads/others');
+      folder = 'uploads/dishes';
+    } else if (req.baseUrl.includes('filters')) {
+      folder = 'uploads/filters';
     }
+
+    // Ensure folder exists
+    fs.mkdirSync(folder, { recursive: true });
+    cb(null, folder);
   },
+
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
     const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
@@ -23,11 +31,11 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png'];
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only JPEG and PNG are allowed.'), false);
+    cb(new Error('Invalid file type. Only JPEG, PNG, JPG, WEBP allowed.'), false);
   }
 };
 

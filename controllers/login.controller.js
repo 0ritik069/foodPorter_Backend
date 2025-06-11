@@ -41,13 +41,13 @@ const login = (role) => async (req, res) => {
       });
     }
 
-    // 🔐 Password compare
+   
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: 'Invalid password' });
     }
 
-    // 🔑 Create JWT
+    
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '30d'
     });

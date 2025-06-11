@@ -57,6 +57,17 @@ const initModels = async () => {
       )
     `);
 
+    await db.query(`
+  CREATE TABLE IF NOT EXISTS filters (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    image VARCHAR(255),
+    type VARCHAR(50) NOT NULL
+  )
+`);
+
+      
+
     // 5. Orders Table
     await db.query(`
       CREATE TABLE IF NOT EXISTS orders (
@@ -86,19 +97,7 @@ const initModels = async () => {
       )
     `);
 
-    await db.query(`
-      CREATE TABLE If Not Exists customers (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  phone VARCHAR(20),
-  profile_image VARCHAR(255),
-  address TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  user_id int not null,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
-      `);
+   
 
     await db.query(
       `CREATE TABLE IF NOT EXISTS drivers (

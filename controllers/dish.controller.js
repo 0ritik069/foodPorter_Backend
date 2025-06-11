@@ -183,7 +183,7 @@ exports.getDishesByCategoryId = async (req, res) => {
 
     const formattedDishes = dishes.map(d => ({
       ...d,
-      image: d.image ? `${BASE_URL}/uploads/dishes/${d.image}` : null
+      image: d.image ? `${baseUrl}/uploads/dishes/${d.image}` : null
     }));
 
     res.status(200).json({
