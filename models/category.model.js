@@ -1,10 +1,10 @@
 const pool = require('../config/db');
 
 const Category = {
-  create: async ({ name, restaurant_id, image, distance }) => {
+  create: async ({ name, restaurant_id, image }) => {
     const [result] = await pool.query(
-      'INSERT INTO categories (name, restaurant_id, image, distance) VALUES (?, ?, ?, ?)',
-      [name, restaurant_id, image, distance]
+      'INSERT INTO categories (name, restaurant_id, image) VALUES (?, ?, ?)',
+      [name, restaurant_id, image]
     );
     return result.insertId;
   },
@@ -24,10 +24,10 @@ const Category = {
     return rows[0];
   },
 
-  update: async (id, { name, distance, image }) => {
+  update: async (id, { name, image }) => {
     await pool.query(
-      'UPDATE categories SET name = ?, distance = ?, image = ? WHERE id = ?',
-      [name, distance, image, id]
+      'UPDATE categories SET name = ?, image = ? WHERE id = ?',
+      [name, image, id]
     );
   },
 

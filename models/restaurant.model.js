@@ -69,7 +69,7 @@ const Restaurant = {
         break;
 
       default:
-        // Show all open restaurants if no type or unknown type
+        
         query = `SELECT * FROM restaurants WHERE status = 'open'`;
         break;
     }

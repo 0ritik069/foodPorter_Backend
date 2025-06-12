@@ -40,7 +40,7 @@ const initModels = async () => {
       )
     `);
 
-    // 4. Products Table
+    // 4. dishes Table
     await db.query(`
       CREATE TABLE IF NOT EXISTS dishes (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -68,7 +68,7 @@ const initModels = async () => {
 
       
 
-    // 5. Orders Table
+    // // 5. Orders Table
     await db.query(`
       CREATE TABLE IF NOT EXISTS orders (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -83,6 +83,33 @@ const initModels = async () => {
         FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
       )
     `);
+
+      await db.query(`
+        CREATE TABLE If NOT EXISTS coupons (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(50) UNIQUE NOT NULL,
+  discount_percent INT NOT NULL, 
+  min_order_amount DECIMAL(10,2) NOT NULL,
+  max_discount DECIMAL(10,2) NOT NULL,
+  expiry_date DATE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+      `);
+
+      await db.query(`
+        CREATE TABLE  If NOT EXISTS carts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  dish_id INT NOT NULL,
+  quantity INT DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (dish_id) REFERENCES dishes(id)
+);
+
+        `)
+
 
     // 6. Order Items Table
     await db.query(`

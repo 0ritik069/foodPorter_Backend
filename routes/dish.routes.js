@@ -4,7 +4,7 @@ const dishController = require('../controllers/dish.controller');
 const { verifyToken, requireRole } = require("../middleware/auth.middleware");
 const upload = require('../middleware/upload');
 
-// ✅ CREATE dish (only for restaurants)
+
 router.post(
   '/',
   verifyToken,
@@ -13,7 +13,7 @@ router.post(
   dishController.createDish
 );
 
-// ✅ UPDATE dish by ID
+
 router.put(
   '/:id',
   verifyToken,
@@ -22,7 +22,6 @@ router.put(
   dishController.updateDish
 );
 
-// ✅ DELETE dish by ID
 router.delete(
   '/:id',
   verifyToken,
@@ -30,18 +29,16 @@ router.delete(
   dishController.deleteDish
 );
 
-// ⚠️ IMPORTANT: Put specific routes BEFORE /:id to avoid conflicts
+router.get('/category/:category_id/restaurant/:restaurant_id', dishController.getDishesByCategoryAndRestaurant);
 
-// ✅ Get dishes by Restaurant ID
+
+
 router.get('/restaurant/:restaurant_id', dishController.getDishesByRestaurantId);
 
-// ✅ Get dishes by Category ID
 router.get('/category/:category_id', dishController.getDishesByCategoryId);
 
-// ✅ Get all dishes (public)
 router.get('/', dishController.getAllDishes);
 
-// ✅ Get dish by ID (last to avoid route conflicts)
 router.get('/:id', dishController.getDishById);
 
 module.exports = router;

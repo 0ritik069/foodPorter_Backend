@@ -47,7 +47,15 @@ const Dish = {
   return rows;
 },
 
-  
+  findByCategoryAndRestaurant: async (category_id, restaurant_id) => {
+  const [rows] = await pool.query(
+    'SELECT * FROM dishes WHERE category_id = ? AND restaurant_id = ?',
+    [category_id, restaurant_id]
+  );
+  return rows;
+},  
+
+
 };
 
 module.exports = Dish;

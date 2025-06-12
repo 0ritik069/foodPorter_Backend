@@ -98,7 +98,7 @@ exports.updateRestaurant = async (req, res) => {
 
     let image = null;
     if (req.file) {
-      image = req.file.filename; // store filename for DB update
+      image = req.file.filename; 
     }
 
     await Restaurant.update(req.params.id, { name, address, phone, image, status, email, ownerName });

@@ -117,15 +117,13 @@ exports.updateDish = async (req, res) => {
     if (req.file) {
       image = req.file.filename;
     }
-
     const updateData = {
       name,
       description,
       price,
-      image,
-      is_available,
-      category_id
-    };
+      category_id,
+      is_available: is_available !== undifined ? is_available  : true, 
+    }
 
     await Dish.update(dishId, updateData);
 
@@ -223,6 +221,40 @@ exports.getDishesByRestaurantId = async (req, res) => {
       message: "Dishes fetched successfully",
       data: formatted
     });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+};
+
+
+exports.getDishesByCategoryAndRestaurant = async (req, res) => {
+  try {
+    const { category_id, restaurant_id } = req.params;
+
+    const dishes = await Dish.findByCategoryAndRestaurant(category_id, restaurant_id);
+
+    if (!dishes.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No dishes found for this category and restaurant"
+      });
+    }
+
+    const formatted = dishes.map(d => ({
+      ...d,
+      image: d.image ? baseUrl + d.image : null
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Dishes fetched successfully",
+      data: formatted
+    });
+
   } catch (error) {
     res.status(500).json({
       success: false,

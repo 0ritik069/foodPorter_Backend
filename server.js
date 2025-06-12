@@ -13,6 +13,7 @@ const customerRoutes = require('./routes/customer.route');
 const driverRoutes = require('./routes/driver.routers');
 const otpRoutes = require('./routes/otpRoutes');
 const searchRoutes = require('./routes/search.route');
+const couponRoutes = require('./routes/coupon.routes');
 const path = require('path');
 dotenv.config();
 
@@ -38,7 +39,8 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/driver', driverRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/filters', require('./routes/filter.route'));
-
+app.use('/api/coupons', couponRoutes);
+app.use('/api/cart', require('./routes/cart.routes'));
 
 app.get('/', (req, res) => {
     res.send('API IS RUNNING');
