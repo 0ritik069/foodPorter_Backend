@@ -14,6 +14,7 @@ const initModels = async () => {
       )
     `);
 
+
     // 2. Restaurants Table
     await db.query(`
       CREATE TABLE IF NOT EXISTS restaurants (
@@ -71,17 +72,19 @@ const initModels = async () => {
     // // 5. Orders Table
     await db.query(`
       CREATE TABLE IF NOT EXISTS orders (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        customer_id INT,
-        restaurant_id INT,
-        total_price DECIMAL(10, 2),
-        payment_method ENUM('cod', 'online') DEFAULT 'cod',
-        payment_status ENUM('pending', 'paid') DEFAULT 'pending',
-        order_status ENUM('placed', 'accepted', 'preparing', 'on_the_way', 'delivered', 'cancelled') DEFAULT 'placed',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (customer_id) REFERENCES users(id),
-        FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
-      )
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  total_amount DECIMAL(10,2) NOT NULL,
+  discount DECIMAL(10,2) DEFAULT 0,
+  delivery_fee DECIMAL(10,2) DEFAULT 0,
+  final_amount DECIMAL(10,2) NOT NULL,
+  coupon_code VARCHAR(50),
+  address TEXT NOT NULL,
+  payment_method ENUM('COD','ONLINE') DEFAULT 'COD',
+  order_status ENUM('pending','confirmed','delivered','cancelled') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
     `);
 
       await db.query(`
@@ -113,15 +116,15 @@ const initModels = async () => {
 
     // 6. Order Items Table
     await db.query(`
-      CREATE TABLE IF NOT EXISTS order_items (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        order_id INT,
-        product_id INT,
-        quantity INT,
-        price DECIMAL(10, 2),
-        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-        FOREIGN KEY (product_id) REFERENCES products(id)
-      )
+     CREATE TABLE If NOT EXISTS order_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT,
+  dish_id INT,
+  quantity INT,
+  price DECIMAL(10,2),
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+  FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE
+);
     `);
 
    

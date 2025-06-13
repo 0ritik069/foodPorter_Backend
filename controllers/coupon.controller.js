@@ -28,7 +28,7 @@ exports.applyCoupon = async (req, res) => {
       });
     }
 
-    // Calculate discount
+  
     let discount = (coupon.discount_percent / 100) * orderTotal;
     if (discount > coupon.max_discount) {
       discount = coupon.max_discount;
